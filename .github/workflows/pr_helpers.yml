@@ -3,9 +3,13 @@
 name: PR helpers
 on:
   push:
-    branches: [develop]
+    branches:
+      - develop
+      - prod
   pull_request_target:
-    branches: [develop]
+    branches:
+      - develop
+      - prod
 
 jobs:
   helpers:
@@ -14,7 +18,7 @@ jobs:
       - name: conflicts check
         uses: mschilde/auto-label-merge-conflicts@v2.0
         with:
-          CONFLICT_LABEL_NAME: "Status: Merge Conflicts"
+          CONFLICT_LABEL_NAME: "Статус: несовместимо"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: auto labeler
