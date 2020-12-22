@@ -3,6 +3,7 @@ on:
   pull_request_target:
     branches:
       - develop
+      - prod
     types: [closed]
 
 jobs:
