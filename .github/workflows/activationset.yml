@@ -1,0 +1,32 @@
+name: Set up License for Unity
+on:  
+  workflow_dispatch:
+    inputs:
+      unityVersion:
+        description: 'Unity Version'     
+        required: true
+        default: '2019.4.14f1'
+  push:
+    paths:
+      - 'activationset.yml'
+
+jobs:
+   activationset:
+    name: Activate manual activation file for ${{ matrix.unityVersion }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        unityVersion:
+          - ${{ github.event.inputs.unityVersion }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        
+      - name: Activation License
+        uses: game-ci/unity-activate@v1.3
+        #i'm stupid so idk how to force github action use previosly downloaded license file. So we use secret license enviroment
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          unityVersion: ${{ matrix.unityVersion }}

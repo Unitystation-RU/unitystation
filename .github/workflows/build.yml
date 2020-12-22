@@ -1,0 +1,62 @@
+name: Build Deployment UnityStation
+
+on:
+  push:
+    branches:
+      - prod
+
+env:
+  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+
+jobs:
+  buildForSomePlatforms:
+    name: Build US for ${{ matrix.targetPlatform }} on version ${{ matrix.unityVersion }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        projectPath:
+          - UnityProject
+        unityVersion:
+          - 2020.1.6f1
+        targetPlatform:
+        #LIST of available buildtargets is here https://docs.unity3d.com/2019.1/Documentation/ScriptReference/BuildTarget.html
+          - StandaloneWindows64
+          - StandaloneLinux64
+
+    steps:
+        #repo checkout
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+        with:
+          lfs: true
+
+        #use chache to speed up things 
+      - name: Use cache libraries
+        uses: actions/cache@v1.1.0
+        with:
+          path: ${{ matrix.projectPath }}/Library
+          key: Library-${{ matrix.projectPath }}-${{ matrix.targetPlatform }}
+          restore-keys: |
+            Library-${{ matrix.projectPath }}-
+            Library-
+
+      - name: Build
+        uses: webbertakken/unity-builder@v2.0-aplha-5
+        with:
+          projectPath: ${{ matrix.projectPath }}
+          unityVersion: ${{ matrix.unityVersion }}
+          targetPlatform: ${{ matrix.targetPlatform }}
+          buildName: ${{ matrix.targetPlatform }}
+          versioning: Semantic
+
+
+      - name: Upload to Release
+        uses: svenstaro/upload-release-action@2.2.1
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: /github/workspace/build/*
+          asset_name: SB_${{ matrix.targetPlatform }}
+          tag: ${{ github.ref }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
